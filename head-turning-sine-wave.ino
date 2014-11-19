@@ -1,50 +1,63 @@
-#include <Math.h>
-#include <Servo.h> 
+//-*- C -*-
 
-Servo myservo;  // create servo object to control a servo 
-                // a maximum of eight servo objects can be created 
+#include <Math.h>
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+                // a maximum of eight servo objects can be created
+
+// multiply by degrees to get radians
+//
 const double degrees_to_radians = 0.0174532925;
 
-//int pos = 0;    // variable to store the servo position 
-
-void setup() 
-{ 
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object 
+void setup()
+{
+  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo.write(90);
 }
 
-void loop() 
-{ 
+void loop()
+{
+  const int startAngle = 10;
+  const int endAngle = 170;
+
+  // milliseconds to wait between servo movement
   const int delayTime = 25;
-  const int startPoint = 5;
-  const int endPoint = 175;
+
+  // maximum servo movement per iteration
   const int increment = 3;
-  const int turnaroundTime = 10;
-  int pos = 0;
-    
+
+  // milliseconds to wait at one end point before reversing rotation
+  const int turnaroundTime = 25;
+
+  int angle = 0;
+
   delay(turnaroundTime);
 
-  for(pos = startPoint; pos < endPoint; )  // goes from 0 degrees to 180 degrees 
-  {                                  // in steps of 1 degree 
-    myservo.write(pos);     // tell servo to go to position in variable 'pos' 
-    delay(delayTime);                       // waits 15ms for the servo to reach the position 
-    
-    float rad = pos * degrees_to_radians;
+  for(angle = startAngle; angle < endAngle; )
+  {
+    myservo.write(angle);       // tell servo to go to position in variable 'angle'
+    delay(delayTime);           // waits for the servo to reach the position
+
+    // amount to rotate head depends on where it is: more in the
+    // middle, & less at the ends. AKA sine wave.
+    float rad = angle * degrees_to_radians;
     int increAngle = ceil(increment * sin(rad));
 
-    pos += increAngle;
-  } 
-  
+    angle += increAngle;
+  }
+
   delay(turnaroundTime);
-  
-  for(pos = endPoint; pos > startPoint; )     // goes from 180 degrees to 0 degrees 
-  {                                
-    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
-    delay(delayTime);                       // waits 15ms for the servo to reach the position 
-    
-    float rad = pos * degrees_to_radians;
+
+  for(angle = endAngle; angle > startAngle; )
+  {
+    myservo.write(angle);       // tell servo to go to position in variable 'angle'
+    delay(delayTime);           // waits for the servo to reach the position
+
+    float rad = angle * degrees_to_radians;
     int increAngle = ceil(increment * sin(rad));
 
-    pos -= increAngle;
-  } 
-} 
+    // note decrement instead of increment
+    angle -= increAngle;
+  }
+}
