@@ -15,7 +15,10 @@ void setup()
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo.write(90);
 
-  Serial.begin(9600);      // open the serial port at 9600 bps:    
+  // initialize digital pin 13 as an output.
+  pinMode(13, OUTPUT);
+
+  Serial.begin(9600);      // open the serial port at 9600 bps:
 }
 
 void loop()
@@ -36,6 +39,7 @@ void loop()
 
   delay(turnaroundTime);
 
+  digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
   for(angle = startAngle; angle < endAngle; )
   {
     myservo.write(angle);       // tell servo to go to position in variable 'angle'
@@ -46,6 +50,7 @@ void loop()
 
   delay(turnaroundTime);
 
+  digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
   for(angle = endAngle; angle > startAngle; )
   {
     myservo.write(angle);       // tell servo to go to position in variable 'angle'
