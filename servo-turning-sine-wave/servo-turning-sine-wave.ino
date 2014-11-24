@@ -3,6 +3,8 @@
 #include <Math.h>
 #include <Servo.h>
 
+
+
 Servo myservo;  // create servo object to control a servo
                 // a maximum of eight servo objects can be created
 
@@ -10,13 +12,23 @@ Servo myservo;  // create servo object to control a servo
 //
 const double degrees_to_radians = 0.0174532925;
 
+
+int rightLightPin = 4;    //connects the digital pin to the Light Detector Board's output
+int leftLightPin = 2;    //connects the digital pin to the Light Detector Board's output
+
 void setup()
 {
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo.write(90);
 
+
+
   // initialize digital pin 13 as an output.
   pinMode(13, OUTPUT);
+
+  // initialize the input pins
+  pinMode(rightLightPin, INPUT); 
+  pinMode(leftLightPin, INPUT); 
 
   Serial.begin(9600);      // open the serial port at 9600 bps:
 }
@@ -36,6 +48,23 @@ void loop()
   const int turnaroundTime = 10;
 
   int angle = 0;
+
+  int leftEye;
+  int rightEye;
+
+// leftEye =  digitalRead(leftLightPin);
+ //rightEye = digitalRead(rightLightPin);
+ 
+  Serial.print("Input:");
+  Serial.print("Left:");
+  Serial.print(digitalRead(leftLightPin)==HIGH);
+  Serial.print("Right:");
+  Serial.print(digitalRead(rightLightPin)==HIGH);
+  Serial.print("\n");
+
+if (0)
+{
+
 
   delay(turnaroundTime);
 
@@ -59,6 +88,8 @@ void loop()
     // note decrement instead of increment
     angle -= calcDeltaAngle(angle, startAngle, endAngle, increment);
   }
+  
+}
 }
 
 int calcDeltaAngle(int angle, int startAngle, int endAngle, int maxAngleIncrement)
