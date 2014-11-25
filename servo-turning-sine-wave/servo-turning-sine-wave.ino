@@ -35,7 +35,11 @@ int currAngle = 90;
 void setup()
 {
   myservo.attach(9);   // attaches the servo on pin 9 to the servo object
-  myservo.write(currAngle);
+
+  // gently turn servo to center - hoping that no one physically turned the servo
+  // from the last write
+  int lastAngle = myservo.read();
+  turnServo(myservo, lastAngle, currAngle, GENTLE_DELAY);
 
   // initialize digital pin 13 as an output.
   pinMode(13, OUTPUT);
