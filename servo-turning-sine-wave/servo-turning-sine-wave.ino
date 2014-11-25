@@ -47,6 +47,11 @@ void setup()
 
 void loop()
 {
+  oscillateGently();
+}
+
+void oscillateGently()
+{
   delay(TURN_AROUND_DELAY);
   //  Serial.println("------------------------------------------------------------");
 
