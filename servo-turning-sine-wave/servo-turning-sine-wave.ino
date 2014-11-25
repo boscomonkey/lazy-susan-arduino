@@ -3,62 +3,117 @@
 #include <Math.h>
 #include <Servo.h>
 
-Servo myservo;  // create servo object to control a servo
-                // a maximum of eight servo objects can be created
+//
+// CONSTANTS
+//
 
 // multiply by degrees to get radians
 //
-const double degrees_to_radians = 0.0174532925;
+const double RADIANS_PER_DEGREE = 0.0174532925;
+
+const int LEFT_LIMIT = 20;
+const int RIGHT_LIMIT = 130;
+
+// milliseconds to wait between servo movement
+const int GENTLE_DELAY = 30;
+
+// maximum servo movement per iteration
+const int ANGLE_INCREMENT = 3;
+
+// milliseconds to wait at one end point before reversing rotation
+const int TURN_AROUND_DELAY = 10;
+
+//
+// GLOBALS
+//
+
+Servo myservo;  // create servo object to control a servo
+                // a maximum of eight servo objects can be created
+
+int currAngle = 90;
 
 void setup()
 {
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
-  myservo.write(90);
+  myservo.attach(9);   // attaches the servo on pin 9 to the servo object
+  myservo.write(currAngle);
 
   // initialize digital pin 13 as an output.
   pinMode(13, OUTPUT);
 
-  Serial.begin(9600);      // open the serial port at 9600 bps:
+  Serial.begin(9600);  // open the serial port at 9600 bps:
+
+  delay(3000);         // wait long enough to open Serial console
 }
 
 void loop()
 {
-  const int startAngle = 20;
-  const int endAngle = 130;
-
-  // milliseconds to wait between servo movement
-  const int delayTime = 30;
-
-  // maximum servo movement per iteration
-  const int increment = 3;
-
-  // milliseconds to wait at one end point before reversing rotation
-  const int turnaroundTime = 10;
-
-  int angle = 0;
-
-  delay(turnaroundTime);
+  delay(TURN_AROUND_DELAY);
+  //  Serial.println("------------------------------------------------------------");
 
   digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-  for(angle = startAngle; angle < endAngle; )
-  {
-    myservo.write(angle);       // tell servo to go to position in variable 'angle'
-    delay(delayTime);           // waits for the servo to reach the position
+  currAngle = turnServo(myservo, currAngle, RIGHT_LIMIT, GENTLE_DELAY);
 
-    angle += calcDeltaAngle(angle, startAngle, endAngle, increment);
-  }
-
-  delay(turnaroundTime);
+  delay(TURN_AROUND_DELAY);
+  //  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
   digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-  for(angle = endAngle; angle > startAngle; )
-  {
-    myservo.write(angle);       // tell servo to go to position in variable 'angle'
-    delay(delayTime);           // waits for the servo to reach the position
+  currAngle = turnServo(myservo, currAngle, LEFT_LIMIT, GENTLE_DELAY);
+}
 
-    // note decrement instead of increment
-    angle -= calcDeltaAngle(angle, startAngle, endAngle, increment);
+int turnServo(Servo servo, int startAngle, int endAngle, int delayTime)
+{
+  int angle = startAngle;
+
+  // turn right
+  if (startAngle < endAngle) {
+    while (angle < endAngle)
+    {
+      //      Serial.print("RIGHT:\t");
+      //      Serial.println(angle);
+
+      servo.write(angle);         // tell servo to go to position in variable 'angle'
+      delay(delayTime);           // waits for the servo to reach the position
+
+      angle += calcDeltaAngle(angle, startAngle, endAngle, ANGLE_INCREMENT);
+    }
   }
+  // turn left
+  else if (startAngle > endAngle) {
+    while (angle > endAngle)
+    {
+      //      Serial.print("LEFT:\t");
+      //      Serial.println(angle);
+
+      servo.write(angle);         // tell servo to go to position in variable 'angle'
+      delay(delayTime);           // waits for the servo to reach the position
+
+      // note decrement instead of increment
+      angle -= calcDeltaAngle(angle, endAngle, startAngle, ANGLE_INCREMENT);
+    }
+  }
+  // don't turn
+  else {
+    Serial.print("NO OP:\t");
+    Serial.println(angle);
+  }
+
+  return angle;
+}
+
+// Rotate servo 'numShakes' back & forth, starting at 'startAngle'.
+// Returns final angle of head
+//
+int shakeServo(int startAngle, int numShakes)
+{
+  const int offCenter = 15;
+
+  int rightAngle = startAngle + offCenter;
+  int leftAngle = startAngle - offCenter;
+
+//  shakeRight(startAngle, rightAngle);
+//  shakeLeft(leftAngle, startAngle);
+
+  return startAngle;
 }
 
 int calcDeltaAngle(int angle, int startAngle, int endAngle, int maxAngleIncrement)
@@ -73,7 +128,7 @@ int calcDeltaAngle(int angle, int startAngle, int endAngle, int maxAngleIncremen
   int offsetAngle = angle - startAngle;
   double normalizedOffset = rangeRatio * offsetAngle;
 
-  double rad = normalizedOffset * degrees_to_radians;
+  double rad = normalizedOffset * RADIANS_PER_DEGREE;
   double sineValue = sin(rad);
   int increAngle = ceil(0.1 + maxAngleIncrement * sineValue);
 
