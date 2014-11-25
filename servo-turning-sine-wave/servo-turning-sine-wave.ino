@@ -11,7 +11,7 @@
 //
 const double RADIANS_PER_DEGREE = 0.0174532925;
 
-const int LEFT_LIMIT = 40;
+const int LEFT_LIMIT = 50;
 const int RIGHT_LIMIT = 130;
 
 // milliseconds to wait between servo movement: when servo is gently oscillating
@@ -27,7 +27,7 @@ const int ANGLE_INCREMENT = 3;
 const int TURN_AROUND_DELAY = 10;
 
 // number of degrees to shake servo on each side of center
-const int SHAKE_OFFSET_ANGLE = 25;
+const int SHAKE_OFFSET_ANGLE = 20;
 
 //
 // GLOBALS
@@ -60,7 +60,7 @@ void loop()
       break;
 
     case 1:
-      currAngle = shakeServo(currAngle, random(4));
+      currAngle = shakeServo(currAngle, random(3));
       break;
   }
 
@@ -70,18 +70,21 @@ void loop()
 
 int oscillateGently(int angle, int numOscillations)
 {
+  int rightEnd = 1 + random(angle, RIGHT_LIMIT - SHAKE_OFFSET_ANGLE);
+  int leftEnd = random(SHAKE_OFFSET_ANGLE, angle);
+
   for (int ii = 0; ii < numOscillations ; ii += 1) {
     delay(TURN_AROUND_DELAY);
     //  Serial.println("------------------------------------------------------------");
   
     digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-    angle = turnServo(myservo, angle, random(angle, RIGHT_LIMIT - SHAKE_OFFSET_ANGLE) + 1, GENTLE_DELAY);
+    angle = turnServo(myservo, angle, rightEnd, GENTLE_DELAY);
   
     delay(TURN_AROUND_DELAY);
     //  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
   
     digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-    angle = turnServo(myservo, angle, random(SHAKE_OFFSET_ANGLE, angle), GENTLE_DELAY);
+    angle = turnServo(myservo, angle, leftEnd, GENTLE_DELAY);
   }
 
   return angle;
