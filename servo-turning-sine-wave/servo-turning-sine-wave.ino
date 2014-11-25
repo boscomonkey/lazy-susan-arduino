@@ -18,13 +18,16 @@ const int RIGHT_LIMIT = 130;
 const int GENTLE_DELAY = 30;
 
 // milliseconds to wait between servo movement: when servo is shaking back & forth
-const int SHAKE_DELAY = 7;
+const int SHAKE_DELAY = 10;
 
 // maximum servo movement per iteration
 const int ANGLE_INCREMENT = 3;
 
 // milliseconds to wait at one end point before reversing rotation
 const int TURN_AROUND_DELAY = 10;
+
+// number of degrees to shake servo on each side of center
+const int SHAKE_OFFSET_ANGLE = 25;
 
 //
 // GLOBALS
@@ -50,25 +53,38 @@ void setup()
 
 void loop()
 {
-  // oscillateGently();
+  // randomly determine which behavior
+  switch (random(2)) {
+    case 0:
+      currAngle = oscillateGently(currAngle, random(5, 10));
+      break;
 
-  currAngle = shakeServo(currAngle, random(5));
-  delay(3000);
+    case 1:
+      currAngle = shakeServo(currAngle, random(4));
+      break;
+  }
+
+  // wait 5 seconds until next loop
+  delay(5000);
 }
 
-void oscillateGently()
+int oscillateGently(int angle, int numOscillations)
 {
-  delay(TURN_AROUND_DELAY);
-  //  Serial.println("------------------------------------------------------------");
+  for (int ii = 0; ii < numOscillations ; ii += 1) {
+    delay(TURN_AROUND_DELAY);
+    //  Serial.println("------------------------------------------------------------");
+  
+    digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+    angle = turnServo(myservo, angle, random(angle, RIGHT_LIMIT - SHAKE_OFFSET_ANGLE) + 1, GENTLE_DELAY);
+  
+    delay(TURN_AROUND_DELAY);
+    //  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+  
+    digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+    angle = turnServo(myservo, angle, random(SHAKE_OFFSET_ANGLE, angle), GENTLE_DELAY);
+  }
 
-  digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-  currAngle = turnServo(myservo, currAngle, RIGHT_LIMIT, GENTLE_DELAY);
-
-  delay(TURN_AROUND_DELAY);
-  //  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-  digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-  currAngle = turnServo(myservo, currAngle, LEFT_LIMIT, GENTLE_DELAY);
+  return angle;
 }
 
 int turnServo(Servo servo, int startAngle, int endAngle, int delayTime)
@@ -116,10 +132,8 @@ int turnServo(Servo servo, int startAngle, int endAngle, int delayTime)
 //
 int shakeServo(int startAngle, int numShakes)
 {
-  const int offCenter = 25;
-
-  int rightEnd = startAngle + offCenter;
-  int leftEnd = startAngle - offCenter;
+  int rightEnd = startAngle + SHAKE_OFFSET_ANGLE;
+  int leftEnd = startAngle - SHAKE_OFFSET_ANGLE;
 
   turnServo(myservo, startAngle, rightEnd, SHAKE_DELAY);
   turnServo(myservo, rightEnd, leftEnd, SHAKE_DELAY);
