@@ -11,11 +11,14 @@
 //
 const double RADIANS_PER_DEGREE = 0.0174532925;
 
-const int LEFT_LIMIT = 20;
+const int LEFT_LIMIT = 40;
 const int RIGHT_LIMIT = 130;
 
-// milliseconds to wait between servo movement
+// milliseconds to wait between servo movement: when servo is gently oscillating
 const int GENTLE_DELAY = 30;
+
+// milliseconds to wait between servo movement: when servo is shaking back & forth
+const int SHAKE_DELAY = 7;
 
 // maximum servo movement per iteration
 const int ANGLE_INCREMENT = 3;
@@ -47,7 +50,10 @@ void setup()
 
 void loop()
 {
-  oscillateGently();
+  // oscillateGently();
+
+  currAngle = shakeServo(currAngle, random(5));
+  delay(3000);
 }
 
 void oscillateGently()
@@ -110,13 +116,19 @@ int turnServo(Servo servo, int startAngle, int endAngle, int delayTime)
 //
 int shakeServo(int startAngle, int numShakes)
 {
-  const int offCenter = 15;
+  const int offCenter = 25;
 
-  int rightAngle = startAngle + offCenter;
-  int leftAngle = startAngle - offCenter;
+  int rightEnd = startAngle + offCenter;
+  int leftEnd = startAngle - offCenter;
 
-//  shakeRight(startAngle, rightAngle);
-//  shakeLeft(leftAngle, startAngle);
+  turnServo(myservo, startAngle, rightEnd, SHAKE_DELAY);
+  turnServo(myservo, rightEnd, leftEnd, SHAKE_DELAY);
+  for (int ii = 0; ii < numShakes ; ii++)
+  {
+    turnServo(myservo, leftEnd, rightEnd, SHAKE_DELAY);
+    turnServo(myservo, rightEnd, leftEnd, SHAKE_DELAY);
+  }
+  turnServo(myservo, leftEnd,  startAngle, SHAKE_DELAY);
 
   return startAngle;
 }
