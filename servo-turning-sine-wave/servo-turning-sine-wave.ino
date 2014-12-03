@@ -11,8 +11,8 @@
 //
 const double RADIANS_PER_DEGREE = 0.0174532925;
 
-const int LEFT_LIMIT = 40;
-const int RIGHT_LIMIT = 130;
+const int LEFT_LIMIT = 90;
+const int RIGHT_LIMIT = 180;
 
 // milliseconds to wait between servo movement: when servo is gently oscillating
 const int GENTLE_DELAY = 30;
@@ -54,13 +54,19 @@ void setup()
 void loop()
 {
   // randomly determine which behavior
-  switch (random(2)) {
+  int behaviorMode = random(4);
+  Serial.print("BEHAVIOR MODE:\t");
+  Serial.println(behaviorMode);
+
+  switch (behaviorMode) {
     case 0:
-      currAngle = oscillateGently(currAngle, random(5, 10));
+    case 1:
+    case 2:
+      currAngle = oscillateGently(currAngle, random(3, 6));
       break;
 
-    case 1:
-      currAngle = shakeServo(currAngle, random(4));
+    case 3:
+      currAngle = shakeServo(currAngle, random(2, 4));
       break;
   }
 
@@ -72,16 +78,40 @@ int oscillateGently(int angle, int numOscillations)
 {
   for (int ii = 0; ii < numOscillations ; ii += 1) {
     delay(TURN_AROUND_DELAY);
-    //  Serial.println("------------------------------------------------------------");
   
     digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-    angle = turnServo(myservo, angle, random(angle, RIGHT_LIMIT - SHAKE_OFFSET_ANGLE) + 1, GENTLE_DELAY);
+    int range = RIGHT_LIMIT - angle;
+    int skew = random(random(range));
+    int limit = RIGHT_LIMIT - skew;
+    angle = turnServo(myservo, angle, limit, GENTLE_DELAY);
+
+    Serial.println("---------------------------------------------------------------- RIGHT");
+    Serial.print("range: ");
+    Serial.print(range);
+    Serial.print("\tskewing: ");
+    Serial.print(skew);
+    Serial.print("\tlimit: ");
+    Serial.print(limit);
+    Serial.print("\tangle: ");
+    Serial.println(angle);
   
     delay(TURN_AROUND_DELAY);
-    //  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
   
     digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-    angle = turnServo(myservo, angle, random(SHAKE_OFFSET_ANGLE, angle), GENTLE_DELAY);
+    range = angle - LEFT_LIMIT;
+    skew = random(random(range));
+    limit = LEFT_LIMIT + skew;
+    angle = turnServo(myservo, angle, limit, GENTLE_DELAY);
+
+    Serial.println("---------------------------------------------------------------- LEFT");
+    Serial.print("range: ");
+    Serial.print(range);
+    Serial.print("\tskewing: ");
+    Serial.print(skew);
+    Serial.print("\tlimit: ");
+    Serial.print(limit);
+    Serial.print("\tangle: ");
+    Serial.println(angle);
   }
 
   return angle;
