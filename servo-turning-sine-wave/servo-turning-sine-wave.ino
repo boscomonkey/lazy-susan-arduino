@@ -11,17 +11,17 @@
 //
 const double RADIANS_PER_DEGREE = 0.0174532925;
 
-const int LEFT_LIMIT = 90;
+const int LEFT_LIMIT = 60;
 const int RIGHT_LIMIT = 180;
 
 // milliseconds to wait between servo movement: when servo is gently oscillating
-const int GENTLE_DELAY = 30;
+const int GENTLE_DELAY = 45;
 
 // milliseconds to wait between servo movement: when servo is shaking back & forth
 const int SHAKE_DELAY = 10;
 
 // maximum servo movement per iteration
-const int ANGLE_INCREMENT = 3;
+const int ANGLE_INCREMENT = 5;
 
 // milliseconds to wait at one end point before reversing rotation
 const int TURN_AROUND_DELAY = 10;
@@ -36,7 +36,7 @@ const int SHAKE_OFFSET_ANGLE = 25;
 Servo myservo;  // create servo object to control a servo
                 // a maximum of eight servo objects can be created
 
-int currAngle = 90;
+int currAngle = 135;
 
 void setup()
 {
@@ -70,22 +70,30 @@ void loop()
       break;
   }
 
-  // wait 5 seconds until next loop
-  delay(5000);
+  // wait random seconds until next loop
+  int delayNext = random(1000, 5000);
+  Serial.print("delayNext:\t");
+  Serial.println(delayNext);
+
+  delay(delayNext);
 }
 
 int oscillateGently(int angle, int numOscillations)
 {
+  int range;
+  int skew;
+  int limit;
+
   for (int ii = 0; ii < numOscillations ; ii += 1) {
     delay(TURN_AROUND_DELAY);
   
-    digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-    int range = RIGHT_LIMIT - angle;
-    int skew = random(random(range));
-    int limit = RIGHT_LIMIT - skew;
+    digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+    range = angle - LEFT_LIMIT;
+    skew = random(random(range));
+    limit = LEFT_LIMIT + skew;
     angle = turnServo(myservo, angle, limit, GENTLE_DELAY);
 
-    Serial.println("---------------------------------------------------------------- RIGHT");
+    Serial.println("---------------------------------------------------------------- LEFT");
     Serial.print("range: ");
     Serial.print(range);
     Serial.print("\tskewing: ");
@@ -97,13 +105,13 @@ int oscillateGently(int angle, int numOscillations)
   
     delay(TURN_AROUND_DELAY);
   
-    digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-    range = angle - LEFT_LIMIT;
+    digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+    range = RIGHT_LIMIT - angle;
     skew = random(random(range));
-    limit = LEFT_LIMIT + skew;
+    limit = RIGHT_LIMIT - skew;
     angle = turnServo(myservo, angle, limit, GENTLE_DELAY);
 
-    Serial.println("---------------------------------------------------------------- LEFT");
+    Serial.println("---------------------------------------------------------------- RIGHT");
     Serial.print("range: ");
     Serial.print(range);
     Serial.print("\tskewing: ");
@@ -165,8 +173,7 @@ int shakeServo(int startAngle, int numShakes)
   int rightEnd = startAngle + SHAKE_OFFSET_ANGLE;
   int leftEnd = startAngle - SHAKE_OFFSET_ANGLE;
 
-  turnServo(myservo, startAngle, rightEnd, SHAKE_DELAY);
-  turnServo(myservo, rightEnd, leftEnd, SHAKE_DELAY);
+  turnServo(myservo, startAngle, leftEnd, SHAKE_DELAY);
   for (int ii = 0; ii < numShakes ; ii++)
   {
     turnServo(myservo, leftEnd, rightEnd, SHAKE_DELAY);
