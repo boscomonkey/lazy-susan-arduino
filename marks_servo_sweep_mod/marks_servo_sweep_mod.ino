@@ -16,8 +16,8 @@ int dir = -2;
 //
 const double RADIANS_PER_DEGREE = 0.0174532925;
 
-const int LEFT_LIM = 35;
-const int RIGHT_LIM = 125;
+const int LEFT_LIM = 60;
+const int RIGHT_LIM = 140;
 // milliseconds to wait between servo movement: when servo is gently oscillating
 
 
@@ -49,5 +49,7 @@ int rand_delay(int min_time, int rand_range){
   int r = random(rand_range);
   int del = min_time + rand_range;
   delay(del);
+
+  Serial.println(del);
 }
 
