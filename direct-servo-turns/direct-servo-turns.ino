@@ -55,7 +55,7 @@ void checkEyes(int highLimit, int lowLimit, int variation)
     myservo.write(angle);
 
     Serial.print("\t");
-    rndDelay();
+    rndDelay(4000, 6000);
 
     Serial.print("\t");
     int rightValue = readDetector(DETECTOR_RIGHT, "right");
@@ -70,6 +70,12 @@ void checkEyes(int highLimit, int lowLimit, int variation)
       // right side movement
       angle = random(angle, angle + variation);
     }
+    else if (HIGH == leftValue && HIGH == rightValue) {
+      // both eyes busy - big swings left & right
+      rndTurn(LOW_LIMIT, LOW_LIMIT + VARIATION);
+      rndTurn(HIGH_LIMIT - VARIATION, HIGH_LIMIT);
+      break;
+    }
     else {
       break;
     }
@@ -78,9 +84,9 @@ void checkEyes(int highLimit, int lowLimit, int variation)
   Serial.print("\t");
 }
 
-void rndDelay()
+void rndDelay(int loBound, int hiBound)
 {
-  int ms = random(4000, 7000);
+  int ms = random(loBound, hiBound);
 
   Serial.print("delay:");
   Serial.print(ms);
@@ -98,7 +104,7 @@ void rndTurn(int low, int high)
 
   myservo.write(angle);
 
-  rndDelay();
+  rndDelay(2000, 4000);
   Serial.println("");
 }
 
