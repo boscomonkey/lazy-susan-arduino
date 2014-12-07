@@ -12,7 +12,7 @@ Servo myservo;  // create servo object to control a servo
 
 void setup()
 {
-  Serial.begin(115200);  // 57600 * 2
+  Serial.begin(9600);
 
   // initialize detector input pins
   pinMode(DETECTOR_LEFT, INPUT); 
