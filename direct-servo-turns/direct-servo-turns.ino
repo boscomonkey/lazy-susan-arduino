@@ -22,7 +22,7 @@ void rndDelay()
 {
   int ms = random(3000, 7000);
 
-  Serial.print("delay:\t");
+  Serial.print("delay:\t\t");
   Serial.println(ms);
 
   delay(ms);
