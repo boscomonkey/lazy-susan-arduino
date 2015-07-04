@@ -12,6 +12,11 @@
   Inspired by http://playground.arduino.cc/Code/PIRsense
  */
 
+/*
+ * external declarations
+ */
+void initialize_pir();
+
 // amount of time we give the sensor to calibrate (10-60 secs
 // according to the datasheet)
 int calibrationTime = 60;
@@ -24,6 +29,8 @@ unsigned long lastTime;
 
 
 void setup() {
+  initialize_pir();
+
   Serial.begin(9600);
   pinMode(pirPin, INPUT);
   pinMode(ledPin, OUTPUT);
