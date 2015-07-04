@@ -3,19 +3,15 @@
 #include <Math.h>
 #include <Servo.h>
 
-//
-// CONSTANTS
-//
-
 // multiply by degrees to get radians
 //
 const double RADIANS_PER_DEGREE = 0.0174532925;
 
-const int LEFT_LIMIT = 60;
-const int RIGHT_LIMIT = 180;
+const int LEFT_LIMIT = 80;
+const int RIGHT_LIMIT = 140;
 
 // milliseconds to wait between servo movement: when servo is gently oscillating
-const int GENTLE_DELAY = 45;
+const int GENTLE_DELAY = 100;
 
 // milliseconds to wait between servo movement: when servo is shaking back & forth
 const int SHAKE_DELAY = 10;
@@ -29,6 +25,13 @@ const int TURN_AROUND_DELAY = 10;
 // number of degrees to shake servo on each side of center
 const int SHAKE_OFFSET_ANGLE = 25;
 
+// infra red motion detectors
+const int IR_LEFT = 3;
+const int IR_RIGHT = 5;
+
+// diagnostic LED
+const int LED_DIAG = 13;
+
 //
 // GLOBALS
 //
@@ -36,17 +39,21 @@ const int SHAKE_OFFSET_ANGLE = 25;
 Servo myservo;  // create servo object to control a servo
                 // a maximum of eight servo objects can be created
 
-int currAngle = 135;
+int currAngle = 100;
 
 void setup()
 {
   myservo.attach(9);   // attaches the servo on pin 9 to the servo object
   myservo.write(currAngle);
 
-  // initialize digital pin 13 as an output.
-  pinMode(13, OUTPUT);
+  // initialize diagnostic LED
+  pinMode(LED_DIAG, OUTPUT);
 
   Serial.begin(9600);  // open the serial port at 9600 bps:
+
+  // initialize IR detectors
+  pinMode(IR_LEFT, INPUT); 
+  pinMode(IR_RIGHT, INPUT); 
 
   delay(3000);         // wait long enough to open Serial console
 }
@@ -59,15 +66,15 @@ void loop()
   Serial.println(behaviorMode);
 
   switch (behaviorMode) {
+
     case 0:
-    case 1:
-    case 2:
+      currAngle = shakeServo(currAngle, random(2, 4));
+      break;
+
+    default:
       currAngle = oscillateGently(currAngle, random(3, 6));
       break;
 
-    case 3:
-      currAngle = shakeServo(currAngle, random(2, 4));
-      break;
   }
 
   // wait random seconds until next loop
@@ -85,9 +92,9 @@ int oscillateGently(int angle, int numOscillations)
   int limit;
 
   for (int ii = 0; ii < numOscillations ; ii += 1) {
-    delay(TURN_AROUND_DELAY);
+    delay(random(1500, 3000));
   
-    digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+    digitalWrite(LED_DIAG, LOW);    // turn the LED off by making the voltage LOW
     range = angle - LEFT_LIMIT;
     skew = random(random(range));
     limit = LEFT_LIMIT + skew;
@@ -103,9 +110,9 @@ int oscillateGently(int angle, int numOscillations)
     Serial.print("\tangle: ");
     Serial.println(angle);
   
-    delay(TURN_AROUND_DELAY);
+    delay(random(1500, 3000));
   
-    digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+    digitalWrite(LED_DIAG, HIGH);   // turn the LED on (HIGH is the voltage level)
     range = RIGHT_LIMIT - angle;
     skew = random(random(range));
     limit = RIGHT_LIMIT - skew;
