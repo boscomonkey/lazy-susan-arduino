@@ -19,12 +19,38 @@
 const int calibrationTime = 60;
 const int ledPin = 13;
 
-Pir pir = Pir(3);   //the digital pin connected to the PIR sensor's output
+// simple listener class to display PIR transitions
+class SimpleListener : public PirTransitionListener {
+  public:
+    virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration);
+};
+
+void SimpleListener::onTransition(int pin, int fromState, int toState, unsigned long fromDuration) {
+  Serial.print("pin:");
+  Serial.print(pin);
+  Serial.print("\t");
+
+  Serial.print(fromState);
+  Serial.print("->");
+  Serial.print(toState);
+  Serial.print("\t");
+
+  Serial.println(fromDuration);
+
+  // show PIR state on LED also
+  digitalWrite(ledPin, toState);
+}
+
+/*
+ * global vars
+ */
+Pir pir(3);                 // PIR is connected to pin 3
+SimpleListener listener;
+
 
 void setup() {
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
-  pir = Pir(3);
 
   //give the sensor some time to calibrate
   Serial.print("calibrating sensor ");
@@ -36,29 +62,11 @@ void setup() {
   Serial.println("SENSOR ACTIVE");
 
   pir.init();
+  pir.registerListener(&listener);
 }
 
 
 void loop() {
   pir.loop();
-
-  /*
-  int pirValue = digitalRead(pirPin);
-  unsigned long nowTime = millis();
-
-  // only check for transitions
-  if (pirValue != lastPir) {
-    unsigned long elapsed = nowTime - lastTime;
-
-    Serial.print(elapsed);
-    Serial.print("\t");
-    Serial.println(lastPir);
-
-    digitalWrite(ledPin, pirValue);
-
-    lastPir = pirValue;
-    lastTime = nowTime;
-  }
-   */
 }
 

@@ -3,27 +3,28 @@
 
 #include <Arduino.h>
 
+class PirTransitionListener
+{
+  public:
+    virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration) = 0;
+};
+
 class Pir
 {
   public:
-
-    class TransitionListener
-    {
-        void onEvent(Pir, int fromState, int toState, unsigned long fromDuration);
-    };
 
     Pir(int userPin);
     void init();
     void loop();
     int read();
-    void registerListener(TransitionListener *ptl);
+    void registerListener(PirTransitionListener *ptl);
 
   private:
 
     int pirPin;
     int lastState;
     unsigned long lastTime;
-    TransitionListener *plistener;
+    PirTransitionListener *plistener;
 };
 
 Pir::Pir(int userPin) {
@@ -41,22 +42,15 @@ void Pir::init() {
 
 void Pir::loop() {
   int currState = digitalRead(pirPin);
-  unsigned long currTime = millis();
 
   // only check for transitions
   if (currState != lastState) {
+    unsigned long currTime = millis();
     unsigned long elapsed = currTime - lastTime;
 
-    Serial.print("pin:");
-    Serial.print(pirPin);
-    Serial.print("\t");
-
-    Serial.print(lastState);
-    Serial.print("->");
-    Serial.print(currState);
-    Serial.print("\t");
-
-    Serial.println(elapsed);
+    if (NULL != plistener) {
+      plistener->onTransition(pirPin, lastState, currState, elapsed);
+    }
 
     lastState = currState;
     lastTime = currTime;
@@ -67,7 +61,7 @@ int Pir::read() {
   return digitalRead(pirPin);
 }
 
-void Pir::registerListener(TransitionListener *ptl) {
+void Pir::registerListener(PirTransitionListener *ptl) {
   plistener = ptl;
 }
 
