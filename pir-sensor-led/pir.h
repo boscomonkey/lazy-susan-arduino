@@ -3,28 +3,27 @@
 
 #include <Arduino.h>
 
-class PirTransitionListener
-{
-  public:
-    virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration) = 0;
-};
-
 class Pir
 {
   public:
+
+    class TransitionListener {
+      public:
+        virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration) = 0;
+    };
 
     Pir(int userPin);
     void init();
     void loop();
     int read();
-    void registerListener(PirTransitionListener *ptl);
+    void registerListener(TransitionListener *ptl);
 
   private:
 
     int pirPin;
     int lastState;
     unsigned long lastTime;
-    PirTransitionListener *plistener;
+    TransitionListener *plistener;
 };
 
 Pir::Pir(int userPin) {
@@ -61,7 +60,7 @@ int Pir::read() {
   return digitalRead(pirPin);
 }
 
-void Pir::registerListener(PirTransitionListener *ptl) {
+void Pir::registerListener(TransitionListener *ptl) {
   plistener = ptl;
 }
 

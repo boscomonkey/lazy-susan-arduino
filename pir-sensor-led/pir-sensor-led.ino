@@ -20,7 +20,7 @@ const int calibrationTime = 60;
 const int ledPin = 13;
 
 // simple listener class to display PIR transitions
-class SimpleListener : public PirTransitionListener {
+class SimpleListener : public Pir::TransitionListener {
   public:
     virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration);
 };
