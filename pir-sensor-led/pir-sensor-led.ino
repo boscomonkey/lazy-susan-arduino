@@ -14,59 +14,63 @@
 
 #include "pir.h"
 
-// amount of time we give the sensor to calibrate (10-60 secs
-// according to the datasheet)
-const int calibrationTime = 60;
-const int ledPin = 13;
-
-// simple listener class to display PIR transitions
-class SimpleListener : public Pir::TransitionListener {
+// This listener class only cares about UP (i.e., 0 -> 1) transitions
+//
+class UpListener : public Pir::TransitionListener {
   public:
     virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration);
+  private:
+    unsigned long lastUpTime = 0L;
 };
 
-void SimpleListener::onTransition(int pin, int fromState, int toState, unsigned long fromDuration) {
-  Serial.print("pin:");
-  Serial.print(pin);
-  Serial.print("\t");
+void UpListener::onTransition(int pin, int fromState, int toState, unsigned long fromDuration) {
+  if (LOW == fromState && HIGH == toState) {
+    unsigned long currTime = millis();
 
-  Serial.print(fromState);
-  Serial.print("->");
-  Serial.print(toState);
-  Serial.print("\t");
+    Serial.print("pin:");
+    Serial.print(pin);
 
-  Serial.println(fromDuration);
+    if (0L != lastUpTime) {
+      unsigned long elapsed = currTime - lastUpTime;
 
-  // show PIR state on LED also
-  digitalWrite(ledPin, toState);
+      Serial.print("\t");
+      Serial.print(elapsed);
+    }
+
+    Serial.println("");
+    lastUpTime = currTime;
+  }
 }
 
 /*
  * global vars
  */
-Pir pir(3);                 // PIR is connected to pin 3
-SimpleListener listener;
+const int INVALID_PIN = -1;
+const int LED_PIN = 13;
+const int PIR_PINS[] = {2, 3};
+
+Pir pir2 = Pir(2);
+Pir pir3 = Pir(3);
+UpListener listener2;
+UpListener listener3;
 
 
 void setup() {
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
-  //give the sensor some time to calibrate
-  Serial.print("calibrating sensor ");
-  for (int i = 0; i < calibrationTime; i++) {
-    Serial.print(pir.read());
-    delay(500);
-  }
-  Serial.println(" done");
+  pir2.init();
+  pir2.registerListener(&listener2);
+
+  pir3.init();
+  pir3.registerListener(&listener3);
+
   Serial.println("SENSOR ACTIVE");
-
-  pir.init();
-  pir.registerListener(&listener);
 }
 
 
 void loop() {
-  pir.loop();
+  pir2.loop();
+  pir3.loop();
 }
 
