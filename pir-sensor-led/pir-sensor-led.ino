@@ -19,6 +19,8 @@
 //
 class UpListener : public Pir::TransitionListener {
   public:
+    const int degreeVariance = 10;
+
     UpListener(Servo *pservo, int degree);
     virtual void onTransition(int pin, int fromState, int toState, unsigned long fromDuration);
   private:
@@ -50,7 +52,7 @@ void UpListener::onTransition(int pin, int fromState, int toState, unsigned long
     Serial.println("");
     lastUpTime = currTime;
 
-    pMyServo->write(random(degreeHeading-20, degreeHeading+20));
+    pMyServo->write(random(degreeHeading-degreeVariance, degreeHeading+degreeVariance));
   }
 }
 
@@ -64,10 +66,14 @@ const int SERVO_PIN = 9;
 
 Pir pir2(2);
 Pir pir3(3);
+Pir pir4(4);
+Pir pir5(5);
 Servo myservo;  // create servo object to control a servo
                 // a maximum of eight servo objects can be created
 UpListener listener2(&myservo, 120);
-UpListener listener3(&myservo, 60);
+UpListener listener3(&myservo, 100);
+UpListener listener4(&myservo, 80);
+UpListener listener5(&myservo, 60);
 
 void setup() {
   Serial.begin(9600);
@@ -82,6 +88,12 @@ void setup() {
   pir3.init();
   pir3.registerListener(&listener3);
 
+  pir4.init();
+  pir4.registerListener(&listener4);
+
+  pir5.init();
+  pir5.registerListener(&listener5);
+
   Serial.println("SENSOR ACTIVE");
 }
 
@@ -89,5 +101,7 @@ void setup() {
 void loop() {
   pir2.loop();
   pir3.loop();
+  pir4.loop();
+  pir5.loop();
 }
 
