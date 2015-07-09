@@ -70,10 +70,10 @@ Pir pir4(4);
 Pir pir5(5);
 Servo myservo;  // create servo object to control a servo
                 // a maximum of eight servo objects can be created
-UpListener listener2(&myservo, 120);
-UpListener listener3(&myservo, 100);
-UpListener listener4(&myservo, 80);
-UpListener listener5(&myservo, 60);
+UpListener listener2(&myservo, 165);
+UpListener listener3(&myservo, 120);
+UpListener listener4(&myservo, 75);
+UpListener listener5(&myservo, 30);
 
 void setup() {
   Serial.begin(9600);
